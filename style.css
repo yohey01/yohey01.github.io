@@ -37,3 +37,33 @@ body {
   margin-bottom: 10px;
 
 }
+.pagination {
+  margin-top: 20px;
+}
+
+.page-item.active .page-link {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.btn-outline-secondary {
+  position: fixed !important;
+  right: 15px !important;
+  padding: 10px 20px !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  z-index: 1000; /* Ensure it stays above other content */
+}
+
+#scrollToTop {
+  bottom: 120px; /* Position it a bit above the bottom button */
+}
+
+#scrollToBottom {
+  bottom: 60px; /* Position it near the bottom */
+}
+
+/* Add hover effect */
+.scroll-btn:hover {
+  background-color: #0056b3;
+}
