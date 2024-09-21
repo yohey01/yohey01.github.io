@@ -12,7 +12,7 @@ body {
 .entry {
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
   border: 1px solid #ccc;
-  padding: 30px;
+  padding: 25px;
   margin-bottom: 30px;
   margin-left: 15px;
 }
@@ -29,7 +29,13 @@ body {
   display: flex;
   flex-wrap: wrap;
 }
+img {
+  width: 80%;  
+  height: auto;
+  margin-right: 30px;
+  margin-bottom: 10px;
 
+}
 .image {
   /* width: 30%;  
   height: auto; */
