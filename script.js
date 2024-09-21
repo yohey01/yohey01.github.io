@@ -37,7 +37,7 @@ async function fetchData() {
     refurlElement.textContent = entryData.url;
 
     
-    const contentElement = document.createElement('h5');
+    const contentElement = document.createElement('p');
     contentElement.classList.add('content', 'card-text');
     contentElement.innerHTML = entryData.content;
 
@@ -70,3 +70,31 @@ async function fetchData() {
 }
 
 fetchData();
+
+
+const content = document.getElementById('content1');
+const showfontsize = document.getElementById('fontsize');
+const increaseSizeBtn = document.getElementById('increasesize');
+const decreaseSizeBtn = document.getElementById('decreasesize');
+
+let fontSize = 16;
+
+// Function to increase font size
+function increaseFontSize() {
+    fontSize += 2;
+    content.style.fontSize = fontSize + 'px';
+    showfontsize.text = 'Font Size: '+fontSize
+}
+
+function decreaseFontSize() {
+    if (fontSize > 12) { // Prevent font size from going below 12px
+        fontSize -= 2;
+        content.style.fontSize = fontSize + 'px';
+        showfontsize.text = 'Font Size: '+fontSize
+      }
+}
+
+
+// Event listeners for the buttons
+increaseSizeBtn.addEventListener('click', increaseFontSize);
+decreaseSizeBtn.addEventListener('click', decreaseFontSize);
