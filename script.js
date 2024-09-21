@@ -21,7 +21,7 @@ async function fetchData() {
     const parsedImageOrder = JSON.parse(imageOrder);
 
     const entryElement = document.createElement('div');
-    entryElement.classList.add('entry', 'card', 'card-body', 'col-md-5');
+    entryElement.classList.add('entry', 'card', 'card-body');
 
     const titleElement = document.createElement('h2');
     titleElement.classList.add('title', 'card-title');
