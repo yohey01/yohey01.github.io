@@ -133,8 +133,19 @@ function renderPagination() {
   prevItem.appendChild(prevLink);
   paginationElement.appendChild(prevItem);
 
-  // Numbered page buttons
-  for (let i = 1; i <= totalPages; i++) {
+  
+  // Generate numbered page buttons (restrict to a max of 10 visible buttons for UX)
+  let startPage = Math.max(1, currentPage - 5);
+  let endPage = Math.min(totalPages, currentPage + 4);
+
+  // Ensure at least 10 buttons are shown unless at start/end of the range
+  if (currentPage <= 5) {
+    endPage = Math.min(totalPages, 10);
+  } else if (currentPage + 4 >= totalPages) {
+    startPage = Math.max(1, totalPages - 9);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
     const pageItem = document.createElement('li');
     pageItem.classList.add('page-item', i === currentPage ? 'active' : 'deactive');
 
