@@ -58,7 +58,8 @@ function renderPage() {
 
     const titleElement = document.createElement('h2');
     titleElement.classList.add('title', 'card-title');
-    titleElement.textContent = entryData.title;
+    let idx = index +1
+    titleElement.textContent = "("+ idx +") | " + entryData.title;
 
     const dateElement = document.createElement('p');
     dateElement.classList.add('date');
