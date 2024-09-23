@@ -3,6 +3,20 @@ const entriesPerPage = 10;
 let targetEntries = [];
 let imageEntries = [];
 
+// Function to get the current page from the URL
+function getCurrentPageFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const page = parseInt(params.get('page'));
+  return isNaN(page) || page < 1 ? 1 : page; // Default to page 1 if no valid page is in the URL
+}
+
+// Function to update the URL with the current page
+function updateURLWithPage(page) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('page', page);
+  window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+}
+
 async function fetchData() {
   const [targetData, imageData] = await Promise.all([
     fetch('target.txt').then(response => response.text()),
@@ -10,8 +24,11 @@ async function fetchData() {
   ]);
   targetEntries = targetData.split('-dividingline-').filter(entry => entry !== '');
   imageEntries = imageData.split('-dividingline-').filter(entry => entry !== '');
-  console.log('targetEntries length:', targetEntries.length);
-  renderPage(); // Render the first page initially
+
+  // Set currentPage based on the URL parameter
+  currentPage = getCurrentPageFromURL();
+  
+  renderPage(); // Render the page based on the current page
 }
 
 function renderPage() {
@@ -21,35 +38,20 @@ function renderPage() {
   const start = (currentPage - 1) * entriesPerPage;
   const end = start + entriesPerPage;
   const entriesToDisplay = targetEntries.slice(start, end);
-  console.log('entriesToDisplay length:', entriesToDisplay.length);
-  console.log('start:'+ start+ 'end:'+ end);
-
+  
+  // Display the entries for the current page
   entriesToDisplay.forEach((entry, index) => {
-    console.log('Entry', index, entry);
-
-    // const entryData = entry.split('\n').reduce((acc, line) => {
-    //   const [key, value] = line.split(':');
-    //   acc[key] = value;
-    //   return acc;
-    // }, {});
-
-
     const entryData = {};
     let haveimage = false;
+    
     entry.split('\n').forEach(line => {
-        const [key, ...valueParts] = line.split('='); // Allow '=' in the value
-        // if (key=='content'){
-        //   console.log(valueParts);
-
-        // }
-        if (key=='image_order'){
-          haveimage = true;
-
-        }
-        const value = valueParts.join('='); // Reconstruct the full value
-        entryData[key] = value;
+      const [key, ...valueParts] = line.split('=');
+      const value = valueParts.join('=');
+      entryData[key] = value;
+      if (key === 'image_order') {
+        haveimage = true;
+      }
     });
-
 
     const entryElement = document.createElement('div');
     entryElement.classList.add('entry', 'card', 'card-body');
@@ -68,49 +70,38 @@ function renderPage() {
     refurlElement.textContent = entryData.url;
 
     const hrElement = document.createElement('hr');
-
-
     const contentElement = document.createElement('div');
     contentElement.classList.add('content', 'card-text');
     contentElement.innerHTML = entryData.content;
 
-
     entryElement.appendChild(titleElement);
     entryElement.appendChild(refurlElement);
     entryElement.appendChild(dateElement);
-    
-    if(haveimage){
-      const imageOrderStr = entryData.image_order;
-      const imageOrder = imageOrderStr.replace(/'/g, '"');
-      const parsedImageOrder = JSON.parse(imageOrder);
-  
+
+    if (haveimage) {
       const imagesElement = document.createElement('div');
-      imagesElement.classList.add('images','row', 'row-cols-2');
-  
-      parsedImageOrder.forEach(imageId => {
+      imagesElement.classList.add('images', 'row', 'row-cols-2');
+      const imageOrder = JSON.parse(entryData.image_order.replace(/'/g, '"'));
+
+      imageOrder.forEach(imageId => {
         const imageElement = document.createElement('img');
         imageElement.classList.add('image', 'col');
-        imageElement.src = `images/${imageId}.jpg`; // Adjust the image path as needed
+        imageElement.src = `images/${imageId}.jpg`;
         imagesElement.appendChild(imageElement);
       });
-  
+
       entryElement.appendChild(imagesElement);
     }
 
     entryElement.appendChild(hrElement);
     entryElement.appendChild(contentElement);
-
     content1Element.appendChild(entryElement);
   });
 
-  renderPaginationrenderPage();
+  renderPagination(); // Render pagination based on the current page
 }
 
-function renderPaginationrenderPage() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+function renderPagination() {
   const paginationElement = document.getElementById('pagination');
   paginationElement.innerHTML = ''; // Clear previous pagination
 
@@ -128,6 +119,12 @@ function renderPaginationrenderPage() {
     event.preventDefault();
     if (currentPage > 1) {
       currentPage--;
+      updateURLWithPage(currentPage); // Update the URL
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    
       renderPage();
     }
   };
@@ -135,30 +132,24 @@ function renderPaginationrenderPage() {
   prevItem.appendChild(prevLink);
   paginationElement.appendChild(prevItem);
 
-  // Generate numbered page buttons (restrict to a max of 10 visible buttons for UX)
-  let startPage = Math.max(1, currentPage - 5);
-  let endPage = Math.min(totalPages, currentPage + 4);
-
-  // Ensure at least 10 buttons are shown unless at start/end of the range
-  if (currentPage <= 5) {
-    endPage = Math.min(totalPages, 10);
-  } else if (currentPage + 4 >= totalPages) {
-    startPage = Math.max(1, totalPages - 9);
-  }
-  for (let i = startPage; i <= endPage; i++) {
+  // Numbered page buttons
+  for (let i = 1; i <= totalPages; i++) {
     const pageItem = document.createElement('li');
     pageItem.classList.add('page-item', i === currentPage ? 'active' : 'deactive');
 
     const pageLink = document.createElement('a');
     pageLink.classList.add('page-link');
     pageLink.textContent = i;
-    pageLink.href = '#';
+    pageLink.href = `?page=${i}`; // Link directly to the correct page URL
     pageLink.onclick = (event) => {
       event.preventDefault();
-      if (currentPage < totalPages) {
-        currentPage = i;
-        renderPage();
-      }
+      currentPage = i;
+      updateURLWithPage(currentPage); // Update the URL
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      renderPage();
     };
 
     pageItem.appendChild(pageLink);
@@ -177,6 +168,11 @@ function renderPaginationrenderPage() {
     event.preventDefault();
     if (currentPage < totalPages) {
       currentPage++;
+      updateURLWithPage(currentPage); // Update the URL
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
       renderPage();
     }
   };
@@ -185,6 +181,7 @@ function renderPaginationrenderPage() {
   paginationElement.appendChild(nextItem);
 }
 
+// Call fetchData on page load
 fetchData();
 
 const content = document.getElementById('content1');
